@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: td-deployment
+  labels:
+    app: td
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: td
+  template:
+    metadata:
+      labels:
+        app: td
+    spec:
+      containers:
+      - name: td
+        image: docker.io/enricovalastro/getting-started:latest
+        ports:
+        - containerPort: 3000
+        volumeMounts:
+        - mountPath: "/etc/todos"
+          name: task-pv-storage
+      volumes:
+      - name: task-pv-storage
+        persistentVolumeClaim:
+          claimName: td-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: todo-service
+spec:
+  selector:
+    app: td
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 3000
+    targetPort: 3000
+    nodePort: 30010
