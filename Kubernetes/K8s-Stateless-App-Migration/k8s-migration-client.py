@@ -53,11 +53,13 @@ for pod in pod_list.items:
                 except:
                     x = True
             res = v1.list_namespaced_pod('default', label_selector="app=nginx")
+        new_pod_up_running_timestamp = datetime.datetime.now(dateutil.tz.tzlocal())
+        print(new_pod_up_running_timestamp.strftime(date_format))
 
-        for new_pod in res.items:
-            new_pod_up_running_timestamp = new_pod.status.container_statuses[0].state.running.started_at
-            print(new_pod_up_running_timestamp)
+downt = new_pod_up_running_timestamp - deletion_pod_timestamp
+tot = new_pod_up_running_timestamp - migration_start_timestamp
 
-print("Service nginx migrated from " +origin_node + " node to " + destination_node +" node.")
-print("Duration of the migration process : " + str(new_pod_up_running_timestamp - migration_start_timestamp))
-print("Service downtime: " + str(new_pod_up_running_timestamp - deletion_pod_timestamp))
+print("Duration of the migration process : " + str(tot))
+print("Service downtime: " + str(downt))
+print(str(downt).split(":")[2])
+
