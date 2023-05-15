@@ -61,5 +61,4 @@ tot = new_pod_up_running_timestamp - migration_start_timestamp
 
 print("Duration of the migration process : " + str(tot))
 print("Service downtime: " + str(downt))
-print(str(downt).split(":")[2])
 

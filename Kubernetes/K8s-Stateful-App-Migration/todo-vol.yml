@@ -15,10 +15,10 @@ spec:
     required:
       nodeSelectorTerms:
       - matchExpressions:
-        - key: kubernetes.io/hostname
+        - key: migration
           operator: In
           values:
-          - k8-2
+          - toThis 
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
