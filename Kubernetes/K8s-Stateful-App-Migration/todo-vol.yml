@@ -15,10 +15,10 @@ spec:
     required:
       nodeSelectorTerms:
       - matchExpressions:
-        - key: migration
+        - key: type
           operator: In
           values:
-          - toThis 
+          - source 
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
