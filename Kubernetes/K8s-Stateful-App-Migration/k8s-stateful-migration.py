@@ -21,6 +21,7 @@ destination = {
 
 user="cb0@"
 path= "/home/cb0/state"
+dpath= "/home/cb0"
 
 def execute_command(command):
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -29,11 +30,11 @@ def execute_command(command):
 
 def copy_file_between_nodes(source_node, destination_node, path):
     # Copia il file dal nodo di origine al nodo master
-    copy_step1 = f'sudo scp {user}{source_node}:{path}/todo.db .'
+    copy_step1 = f'sshpass -p "Birex2023" rsync -vrpohlg --delete {user}{source_node}:{path} .'
     execute_command(copy_step1)
 
     # Copia il file dal nodo master al nodo di destinazione
-    copy_step2 = f'sudo scp todo.db {user}{destination_node}:{path}'
+    copy_step2 = f' sshpass -p "Birex2023" rsync -vrpohlg --delete state {user}{destination_node}:{dpath}'
     execute_command(copy_step2)
 
 node_list = v1.list_node()
