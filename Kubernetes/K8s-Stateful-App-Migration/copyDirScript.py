@@ -24,3 +24,4 @@ destination_path = "/home/cb0/"
 # Esegui lo spostamento del file
 copy_file_between_nodes(source_node, destination_node, source_path, destination_path)
 
+# La versione ufficiale utilizza rsync al posto di scp.
