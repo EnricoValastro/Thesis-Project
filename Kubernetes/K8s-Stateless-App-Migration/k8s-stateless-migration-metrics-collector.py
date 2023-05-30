@@ -25,7 +25,7 @@ date_format = '%Y-%m-%d %H:%M:%S%z'
 final_downtime = []
 final_migration_time = []
 
-for j in range(0, 3):
+for j in range(0, 33):
     print(str(j))
     avg_downtime = []
     avg_migration_time = []
