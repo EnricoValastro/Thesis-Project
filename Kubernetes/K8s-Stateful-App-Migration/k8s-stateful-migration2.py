@@ -3,7 +3,7 @@ import subprocess
 import datetime;
 import dateutil.tz
 
-# This script perform a pre-copy stateful migration.
+# This script perform a post-copy stateful migration.
 
 config.load_kube_config()
 v1 = client.CoreV1Api()
@@ -28,6 +28,8 @@ path= "/home/cb0/state"
 dpath= "/home/cb0"
 
 date_format = '%Y-%m-%d %H:%M:%S%z'
+
+pod_name = ""
 
 def execute_command(command):
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -56,16 +58,6 @@ for n in node_list.items:
     elif (('type', 'destination') in n.metadata.labels.items()):
         destination_node = n.status.addresses[0].address
         patch_node_lab_res = v1.patch_node(n.metadata.name, source)
-
-
-# State migration begin
-state_migration_start = datetime.datetime.now(dateutil.tz.tzlocal())
-
-copy_file_between_nodes(source_node, destination_node, path)
-
-# State migration end
-state_migration_end = datetime.datetime.now(dateutil.tz.tzlocal())
-
 pod_list = v1.list_namespaced_pod('default', label_selector="app=td")
 for pod in pod_list.items:
     if("td-deployment" in pod.metadata.name):
@@ -79,6 +71,7 @@ for pod in pod_list.items:
         x = True
         while(res.items[0].metadata.name == pod.metadata.name or x):
             if(res.items[0].metadata.name != pod.metadata.name):
+                pod_name = res.items[0].metadata.name
                 try:
                     res.items[0].status.container_statuses[0].state.running.started_at
                     x = False
@@ -86,8 +79,22 @@ for pod in pod_list.items:
                 except:
                     x = True
             res = v1.list_namespaced_pod('default', label_selector="app=td")
-        downtime_end = datetime.datetime.now(dateutil.tz.tzlocal())
-        migration_end = datetime.datetime.now(dateutil.tz.tzlocal())
+
+# State migration begin
+state_migration_start = datetime.datetime.now(dateutil.tz.tzlocal())
+
+copy_file_between_nodes(source_node, destination_node, path)
+
+# State migration end
+state_migration_end = datetime.datetime.now(dateutil.tz.tzlocal())
+
+downtime_end = datetime.datetime.now(dateutil.tz.tzlocal())
+migration_end = datetime.datetime.now(dateutil.tz.tzlocal())
+
+pod_list = v1.list_namespaced_pod('default', label_selector="app=td")
+for pod in pod_list.items:
+    if("td-deployment" in pod.metadata.name):
+        delete_pod_response = v1.delete_namespaced_pod(pod.metadata.name, 'default')
 
 tot_time = migration_end - migration_start
 data_migration_time = state_migration_end - state_migration_start

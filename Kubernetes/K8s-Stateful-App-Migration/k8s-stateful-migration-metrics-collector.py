@@ -29,9 +29,9 @@ dpath= "/home/cb0"
 
 date_format = '%Y-%m-%d %H:%M:%S%z'
 
-fp1 = open("downtimeReport.txt", "a")
-fp2 = open("totalTimeReport.txt", "a")
-fp3 = open("dataTransferReport.txt", "a")
+fp1 = open("/report/downtimeReport.txt", "a")
+fp2 = open("/report/totalTimeReport.txt", "a")
+fp3 = open("/report/dataTransferReport.txt", "a")
 
 def execute_command(command):
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
