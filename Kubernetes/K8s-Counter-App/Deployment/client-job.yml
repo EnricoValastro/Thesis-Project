@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: client-job
+spec:
+  ttlSecondsAfterFinished: 8
+  template:
+    spec:
+      containers:
+      - name: client
+        image: "docker.io/enricovalastro/client:latest"
+        env:
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        - name: SERVER_ADDRESS
+          value: my-server-service
+        - name: SERVER_PORT
+          value: "30152"
+      restartPolicy: Never
+  backoffLimit: 1
