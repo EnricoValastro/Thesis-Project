@@ -57,7 +57,7 @@ def partial_migration(source_node,destination_node,path):
     print(copy_moste_recent_modified_file1)
     execute_command(copy_moste_recent_modified_file1)
 
-    copy_moste_recent_modified_file2 = f' sshpass -p "Birex2023" rsync -vrpohlg --delete {last_client}.txt {user}{destination_node}:{dpath}'
+    copy_moste_recent_modified_file2 = f' sshpass -p "Birex2023" rsync -vrpohlg --delete {last_client}.txt {user}{destination_node}:{dpath}/counter'
     execute_command(copy_moste_recent_modified_file2)
 
 node_list = v1.list_node()
