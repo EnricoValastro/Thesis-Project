@@ -17,21 +17,21 @@ spec:
         image: "docker.io/enricovalastro/server:latest"
         volumeMounts:
         - mountPath: "./server/counter"
-          name: server-pv
+          name: server-data
         env:
         - name: PYTHONUNBUFFERED
           value: "1"
         - name: LISTEN_PORT
           value: "30152"
       volumes:
-      - name: server-pv
+      - name: server-data
         persistentVolumeClaim:
-          claimName: server-pvc
+          claimName: server-pvc-2
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: my-server-service
+  name: my-server-v2-service
 spec:
   type: ClusterIP
   selector:
