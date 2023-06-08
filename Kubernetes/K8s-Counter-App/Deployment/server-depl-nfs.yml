@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-deployment-with-nfs
+spec:
+  selector:
+    matchLabels:
+      app: server-v2
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: server-v2
+    spec:
+      containers:
+      - name: server-v2
+        image: "docker.io/enricovalastro/server:latest"
+        volumeMounts:
+        - mountPath: "./server/counter"
+          name: server-pv
+        env:
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        - name: LISTEN_PORT
+          value: "30152"
+      volumes:
+      - name: server-pv
+        persistentVolumeClaim:
+          claimName: server-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-server-service
+spec:
+  type: ClusterIP
+  selector:
+    app: server-v2
+  ports:
+  - protocol: TCP
+    port: 30152
