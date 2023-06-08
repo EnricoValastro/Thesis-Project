@@ -81,9 +81,6 @@ state_migration_start = datetime.datetime.now(dateutil.tz.tzlocal())
 # Find and migrate the most recent modified file
 partial_migration(source_node,destination_node,path)
 
-print("Check")
-time.sleep(5)
-
 pod_list = v1.list_namespaced_pod('default', label_selector="app=server")
 for pod in pod_list.items:
     if("server-deployment" in pod.metadata.name):
