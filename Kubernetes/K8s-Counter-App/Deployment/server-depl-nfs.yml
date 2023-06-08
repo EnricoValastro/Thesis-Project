@@ -12,6 +12,15 @@ spec:
       labels:
         app: server-v2
     spec:
+      affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: type
+                  operator: In
+                  values:
+                  - source  
       containers:
       - name: server-v2
         image: "docker.io/enricovalastro/server:latest"
