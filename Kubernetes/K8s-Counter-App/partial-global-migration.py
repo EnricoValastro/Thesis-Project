@@ -42,9 +42,11 @@ user="cb0@"
 path= "/home/cb0/nfs/pvc"
 dpath= "/home/cb0/nfs"
 
+# Copy from nfs to master node the clientHistory file
 get_history = f'sshpass -p "Birex2023" rsync -vrpohlg --delete {user}192.168.42.157:{path}/clientHistory.txt .'
 execute_command(get_history)
 
+# Find last Client 
 with open('clientHistory.txt', 'r') as file:
     clients = file.readlines()
     last_client = clients[-1]
@@ -66,6 +68,7 @@ for n in node_list.items:
 
 # State migration begin
 state_migration_start = datetime.datetime.now(dateutil.tz.tzlocal())
+
 
 copy_moste_recent_modified_file1 = f'sshpass -p "Birex2023" rsync -vrpohlg --delete {user}192.168.42.157:{path}/{last_client}.txt .'
 execute_command(copy_moste_recent_modified_file1)
