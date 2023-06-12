@@ -6,6 +6,7 @@ import dateutil.tz
 config.load_kube_config()
 v1 = client.CoreV1Api()
 
+# Prepara la patch da applicare ai nodi per indurre k8s a spostare PV dal nodo attuale al nodo di destinazione 
 source = {
         "metadata": {
             "labels": {
@@ -33,20 +34,22 @@ def execute_command(command):
     return output, error
 
 def copy_file_between_nodes(source_node, destination_node, path):
-    # Copia il file dal nodo di origine al nodo master
+    # Copia i file dal nodo di origine al nodo master
     copy_step1 = f'sshpass -p "Birex2023" rsync -vrpohlg --delete {user}{source_node}:{path} .'
     execute_command(copy_step1)
 
-    # Copia il file dal nodo master al nodo di destinazione
+    # Copia i file dal nodo master al nodo di destinazione
     copy_step2 = f' sshpass -p "Birex2023" rsync -vrpohlg --delete counter {user}{destination_node}:{dpath}'
     execute_command(copy_step2)
-
-node_list = v1.list_node()
 
 # Migration start
 migration_start = datetime.datetime.now(dateutil.tz.tzlocal())
 
-# Get node list, find source and destination ip, swap labels.
+# Ottiene la lista dei nodi
+node_list = v1.list_node()
+
+# Sulla base del label del nodo capisco qual'è la sorgente e quale è la destinazione, switch dei label 
+# per indurre k8s a spostare il PV da un nodo all'altro
 for n in node_list.items:
     if (('type', 'source') in n.metadata.labels.items()):
         source_node = n.status.addresses[0].address
@@ -58,20 +61,24 @@ for n in node_list.items:
 # State migration begin
 state_migration_start = datetime.datetime.now(dateutil.tz.tzlocal())
 
+# Sposto i dati dalla sorgente alla destinazione
 copy_file_between_nodes(source_node, destination_node, path)
 
 # State migration end
 state_migration_end = datetime.datetime.now(dateutil.tz.tzlocal())
 
+# Richiedo la lista dei pod (è unico) con label "app=server"
 pod_list = v1.list_namespaced_pod('default', label_selector="app=server")
 for pod in pod_list.items:
     if("server-deployment" in pod.metadata.name):
-        # App migration start
+        # Elimino il pod inducendo k8s a richedularlo. Il pod sarà schedulato sul nodo in cui si trova il PV
+        # quindi nel nodo destinazione
         delete_pod_response = v1.delete_namespaced_pod(pod.metadata.name, 'default')
         
         # Downtime begin
         downtime_begin = datetime.datetime.now(dateutil.tz.tzlocal())
 
+        # Attendo attivamente che il pod torni up and running
         res = v1.list_namespaced_pod('default', label_selector="app=server")
         x = True
         while(res.items[0].metadata.name == pod.metadata.name or x):
@@ -83,9 +90,15 @@ for pod in pod_list.items:
                 except:
                     x = True
             res = v1.list_namespaced_pod('default', label_selector="app=server")
+        # Il pod è up e running sul nodo destinazione
+        
+        # Downtime end
         downtime_end = datetime.datetime.now(dateutil.tz.tzlocal())
+
+        # Migration end
         migration_end = datetime.datetime.now(dateutil.tz.tzlocal())
 
+# Calcolo le tempistiche
 tot_time = migration_end - migration_start
 data_migration_time = state_migration_end - state_migration_start
 downtime = downtime_end - downtime_begin
