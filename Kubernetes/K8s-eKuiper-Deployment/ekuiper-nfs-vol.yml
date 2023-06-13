@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-ekuiper-pv
+  labels:
+    app: nfs-ek
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: "10.244.2.65"
+    path: "/ekuiper" # "pvc" folder must exist in "/exports" directory of NFS server
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ekuiper-pvc-2
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 1Gi
+  selector:
+    matchLabels:
+      app: nfs-ek
