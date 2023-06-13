@@ -11,7 +11,7 @@ spec:
     - ReadWriteMany
   nfs:
     server: "10.244.2.65"
-    path: "/ekuiper" # "pvc" folder must exist in "/exports" directory of NFS server
+    path: "/ekuiper" # "ekuiper" folder must exist in "/exports" directory of NFS server
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

@@ -1,0 +1,27 @@
+# Per deployare ekuiper nelle due versioni (nfs e localStorage) basta editare il deployment esistente:
+
+# Per deployare ekuiper nella versione nfs apportare le seguenti modifiche:
+# Aggiungere la node Affinity 
+spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: nd
+                operator: In
+                values:
+                - "1"
+      containers:
+# Inoltre bisogna modificare il PersistentVolumeClaim 
+volumes:
+      - name: ekuiper-data
+        persistentVolumeClaim:
+          claimName: ekuiper-pvc-2
+
+# Per deployare ekuiper nella versione localStorage apportare le seguenti modifiche:
+# Rimuovere la node Affinity 
+# Modificare il PersistentVolumeClaim
+      - name: ekuiper-data
+        persistentVolumeClaim:
+          claimName: ekuiper-pvc
