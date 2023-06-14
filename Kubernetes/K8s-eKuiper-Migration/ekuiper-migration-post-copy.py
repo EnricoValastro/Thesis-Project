@@ -69,15 +69,6 @@ for pod in pod_list.items:
         # Downtime begin
         downtime_begin = datetime.datetime.now(dateutil.tz.tzlocal())
 
-        # State migration begin
-        state_migration_start = datetime.datetime.now(dateutil.tz.tzlocal())
-
-        # Move file between node
-        copy_file_between_nodes(source_node, destination_node, path)
-
-        # State migration end
-        state_migration_end = datetime.datetime.now(dateutil.tz.tzlocal())
-
         res = v1.list_namespaced_pod('default', label_selector="app.kubernetes.io/name=ekuiper")
         x = True
         while(res.items[0].metadata.name == pod.metadata.name or x):
@@ -89,6 +80,15 @@ for pod in pod_list.items:
                 except:
                     x = True
             res = v1.list_namespaced_pod('default', label_selector="app.kubernetes.io/name=ekuiper")
+
+ # State migration begin
+state_migration_start = datetime.datetime.now(dateutil.tz.tzlocal())
+
+# Move file between node
+copy_file_between_nodes(source_node, destination_node, path)
+
+# State migration end
+state_migration_end = datetime.datetime.now(dateutil.tz.tzlocal())
 
 downtime_end = datetime.datetime.now(dateutil.tz.tzlocal())
 migration_end = datetime.datetime.now(dateutil.tz.tzlocal())
