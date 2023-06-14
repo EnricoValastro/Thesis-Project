@@ -14,21 +14,17 @@ v1 = client.CoreV1Api()
 source = {
         "metadata": {
             "labels": {
-                "type": "source"
+                "nd": "1"
             }
         }
 }
 destination = {
         "metadata": {
             "labels": {
-                "type": "destination"
+                "nd": "2"
             }
         }
 }
-
-user="cb0@"
-path= "/home/cb0/kuiper"
-dpath= "/home/cb0"
 
 date_format = '%Y-%m-%d %H:%M:%S%z'
 
@@ -38,26 +34,11 @@ avg_data_migration_time = []
 
 fp1 = open("report/post-copy/tot-time-report.txt", "a")
 fp2 = open("report/post-copy/downtime-report.txt", "a")
-fp3 = open("report/post-copy/data-time-report.txt", "a")
 
-def execute_command(command):
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    output, error = process.communicate()
-    return output, error
-
-def copy_file_between_nodes(source_node, destination_node, path):
-    # Copia il file dal nodo di origine al nodo master
-    copy_step1 = f'sshpass -p "Birex2023" rsync -vrpohlg --delete {user}{source_node}:{path} .'
-    execute_command(copy_step1)
-
-    # Copia il file dal nodo master al nodo di destinazione
-    copy_step2 = f' sshpass -p "Birex2023" rsync -vrpohlg --delete state {user}{destination_node}:{dpath}'
-    execute_command(copy_step2)
-
-
-for i in range(0,33):
+for i in range(0,10):
     print("**************** Round: " + str(i)+" ****************" )
-    for j in range(0,33):
+
+    for j in range(0,16):
         print("******* Run: "+str(j)+" *******")
         
         # Migration start
@@ -100,33 +81,19 @@ for i in range(0,33):
                     res = v1.list_namespaced_pod('default', label_selector="app.kubernetes.io/name=ekuiper")
                 print("Pod up")
 
-        print("Moving state from source to destination") 
-        # State migration begin
-        state_migration_start = datetime.datetime.now(dateutil.tz.tzlocal())
-
-        # Move file between node
-        copy_file_between_nodes(source_node, destination_node, path)
-
-        # State migration end
-        state_migration_end = datetime.datetime.now(dateutil.tz.tzlocal())
-
         downtime_end = datetime.datetime.now(dateutil.tz.tzlocal())
         migration_end = datetime.datetime.now(dateutil.tz.tzlocal())
 
         tot_time = migration_end - migration_start
-        data_migration_time = state_migration_end - state_migration_start
         downtime = downtime_end - downtime_begin
 
         avg_tot_time.append(float(str(tot_time).split(":")[2]))
         avg_downtime.append(float(str(downtime).split(":")[2]))
-        avg_data_migration_time.append(float(str(data_migration_time).split(":")[2]))
 
         time.sleep(3)
     
     fp1.write(str(statistics.mean(avg_tot_time))+",\n")
     fp2.write(str(statistics.mean(avg_downtime))+",\n")
-    fp3.write(str(statistics.mean(avg_data_migration_time))+",\n")
 
 fp1.close()
 fp2.close()
-fp3.close()

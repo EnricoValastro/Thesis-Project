@@ -55,9 +55,9 @@ def copy_file_between_nodes(source_node, destination_node, path):
     execute_command(copy_step2)
 
 
-for i in range(0,10):
+for i in range(0,33):
     print("**************** Round: " + str(i)+" ****************" )
-    for j in range(0,16):
+    for j in range(0,33):
         print("******* Run: "+str(j)+" *******")
         # Migration start
         migration_start = datetime.datetime.now(dateutil.tz.tzlocal())
